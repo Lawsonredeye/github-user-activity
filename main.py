@@ -5,7 +5,7 @@ others"""
 
 import cmd
 from datetime import datetime
-from helpers import push_event, create_event
+from helpers import push_event, create_event, pull_request
 import urllib3
 import sys
 
@@ -29,7 +29,10 @@ class Terminal(cmd.Cmd):
 
     def do_find(self, line: str) -> bool:
         """Finds users git account based on the name passed on the command
-        line"""
+            line
+            
+            example:
+                find <github username>"""
         if not line:
             print('ERROR: find : Must include <github username>')
         else:
@@ -39,10 +42,12 @@ class Terminal(cmd.Cmd):
             if re.status == 200:
                 user_data: list = re.json()
                 if user_data != []:
-                    print('{} have made {} new commits today'.format(
-                        push_event(line, user_data)))
-                    print('{} have created {} new repos'.format(
-                        create_event(line, user_data)))
+                    print('{} have made {} new commits today'.format(line,
+                        push_event(user_data)))
+                    print('{} {} a pull request'.format(line,
+                        pull_request(user_data)))
+                    print('{} created {} new repos'.format(line,
+                        create_event(user_data)))
                 else:
                     print('No recent activity')
             else:
