@@ -4,45 +4,54 @@ handling the user activity passed with default commands like fetch, get, and
 others"""
 
 import cmd
-import requests
+from datetime import datetime
+from helpers import push_event, create_event
+import urllib3
 import sys
 
 
 class Terminal(cmd.Cmd):
     """Handles the method for controlling the shell environment"""
-    intro: str = "Welcome to GitShell"
+    intro: str = """Welcome to github-activity-shell
+    Type 'help' for more information.
+    """
     prompt = 'git-shell$ '
-    url: str = f'https://api.github.com/users/'
+    # url: str = 'https://api.github.com/users/{}/events'
 
     def do_help(self, arg: str) -> bool | None:
         return super().do_help(arg)
-    
+
     def do_greet(self, line: str) -> None:
         if line == "":
             print("Hello, stranger!")
         else:
             print(f"Hello, {line.title()}!")
-    
-    def do_fetch(self, line: str) -> None:
-        if line:
-            print('a request had been made with:', line)
-        else:
-            print('Invalid name')
-        pass
-    
+
     def do_find(self, line: str) -> bool:
-        """Finds users git account based on the name passed on the"""
+        """Finds users git account based on the name passed on the command
+        line"""
         if not line:
-            return 'Must include name'
-        re = requests.get(self.url + line)
-        if re.status_code == 200:
-            user_data: dict = re.json()
-            print('You have {} followers and following {}'.format(
-                user_data['followers'], user_data['following']))
-    
+            print('ERROR: find : Must include <github username>')
+        else:
+            re = urllib3.request(
+                'GET',
+                'https://api.github.com/users/{}/events'.format(line))
+            if re.status == 200:
+                user_data: list = re.json()
+                if user_data != []:
+                    print('{} have made {} new commits today'.format(
+                        push_event(line, user_data)))
+                    print('{} have created {} new repos'.format(
+                        create_event(line, user_data)))
+                else:
+                    print('No recent activity')
+            else:
+                print('{}: User not found'.format(line))
+
     def do_exit(self, line) -> bool:
         """when called deactivate the shell environment"""
         return True
+
 
 if __name__ == '__main__':
     try:
