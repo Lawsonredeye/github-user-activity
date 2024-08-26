@@ -10,6 +10,7 @@ Keep track of your stats all day with the github user activity spotter and also 
 1. clone this [repo](https://github.com/Lawsonredeye/github-user-activity.git)
 2. `pip3 install urllib3` or `$ python -m pip install urllib3`
 3. Run the following interative command:
+    - `python3 main.py`
     - `greet <name>`
     - `find <github user name>`
     - `exit` - exit shell session 
